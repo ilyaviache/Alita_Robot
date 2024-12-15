@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Bot",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "env": {
+                "BOT_TOKEN": "${env:BOT_TOKEN}",
+                "DB_URI": "mongodb://alita:alita123@localhost:27017/alita?authSource=admin",
+                "REDIS_ADDRESS": "localhost:6379",
+                "REDIS_PASSWORD": "redisPassword"
+            },
+            "args": []
+        }
+    ]
+}

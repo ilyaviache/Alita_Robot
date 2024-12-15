@@ -77,4 +77,5 @@ func LoadModules(dispatcher *ext.Dispatcher) {
 	modules.LoadGreetings(dispatcher)
 	modules.LoadBlacklists(dispatcher)
 	modules.LoadMkdCmd(dispatcher)
+	modules.LoadHello(dispatcher)
 }
