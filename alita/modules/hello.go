@@ -1,30 +1,15 @@
 package modules
 
 import (
-	"encoding/json"
 	"fmt"
-	"reflect"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
-	"github.com/davecgh/go-spew/spew"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/callbackquery"
 	"github.com/divideprojects/Alita_Robot/alita/utils/helpers"
 	log "github.com/sirupsen/logrus"
 )
-
-// Helper function to inspect struct fields
-func inspectStruct(v interface{}) {
-	t := reflect.TypeOf(v)
-	if t.Kind() == reflect.Ptr {
-		t = t.Elem()
-	}
-	log.Infof("Type: %s", t.Name())
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		log.Infof("  Field: %s, Type: %s", field.Name, field.Type)
-	}
-}
 
 var helloModule = moduleStruct{
 	moduleName: "Hello",
@@ -34,45 +19,124 @@ func (moduleStruct) hello(b *gotgbot.Bot, ctx *ext.Context) error {
 	msg := ctx.EffectiveMessage
 	user := ctx.EffectiveSender.User
 
-	// Method 1: Basic structured logging
-	log.WithFields(log.Fields{
-		"user_id": ctx.EffectiveSender.User.Id,
-		"chat_id": ctx.EffectiveChat.Id,
-		"command": "hello",
-	}).Info("Command received")
+	logger := log.WithFields(log.Fields{
+		"module":     "Hello",
+		"command":    "hello",
+		"user_id":    user.Id,
+		"user_name":  user.FirstName,
+		"chat_id":    ctx.EffectiveChat.Id,
+		"chat_type":  ctx.EffectiveChat.Type,
+		"message_id": msg.MessageId,
+	})
 
-	// Method 2: JSON pretty print
-	senderJSON, _ := json.MarshalIndent(ctx.EffectiveSender, "", "  ")
-	log.Info("Sender structure:\n", string(senderJSON))
+	logger.Info("Processing hello command")
 
-	// Method 3: Detailed structure dump
-	log.Info("Full context dump:")
-	spew.Dump(ctx.EffectiveSender)
+	// Create inline keyboard
+	keyboard := gotgbot.InlineKeyboardMarkup{
+		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
+			{
+				{
+					Text:         "👋 Say Hi Back",
+					CallbackData: "hello_hi_back",
+				},
+				{
+					Text: "Bot Info",
+					Url:  "https://t.me/" + b.Username,
+				},
+			},
+		},
+	}
 
-	// Method 4: Verbose format printing
-	log.Infof("Message verbose: %+v", msg)
+	// Send welcome message with keyboard
+	replyText := fmt.Sprintf("👋 Hello %s! I'm Alita, nice to meet you!\n\nTry out the buttons below!", user.FirstName)
 
-	// Method 5: Using reflection
-	log.Info("Inspecting EffectiveSender structure:")
-	inspectStruct(ctx.EffectiveSender)
-
-	// Original functionality
-	replyText := fmt.Sprintf("👋 Hello %s! I'm Alita, nice to meet you!", user.FirstName)
-
-	_, err := msg.Reply(b, replyText, helpers.Shtml())
+	sentMsg, err := msg.Reply(b, replyText, &gotgbot.SendMessageOpts{
+		ParseMode:   helpers.HTML,
+		ReplyMarkup: keyboard,
+	})
 	if err != nil {
-		log.Error("Error sending hello message: ", err)
+		logger.WithError(err).Error("Failed to send hello message")
 		return err
+	}
+
+	logger.WithFields(log.Fields{
+		"sent_message_id": sentMsg.MessageId,
+	}).Debug("Successfully sent hello message")
+
+	return ext.EndGroups
+}
+
+func (moduleStruct) helloCallback(b *gotgbot.Bot, ctx *ext.Context) error {
+	query := ctx.CallbackQuery
+	user := query.From
+
+	// Initialize logger with basic fields
+	logger := log.WithFields(log.Fields{
+		"module":    "Hello",
+		"callback":  "hello_hi_back",
+		"user_id":   user.Id,
+		"user_name": user.FirstName,
+	})
+
+	// Handle message information if available
+	if msg, ok := query.Message.(*gotgbot.Message); ok {
+		logger = logger.WithFields(log.Fields{
+			"message_id": msg.MessageId,
+			"chat_id":    msg.Chat.Id,
+			"chat_type":  msg.Chat.Type,
+		})
+	}
+
+	logger.Info("Processing hello callback")
+
+	// Answer callback query
+	_, err := query.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
+		Text: "Hello there! 👋",
+	})
+	if err != nil {
+		logger.WithError(err).Error("Failed to answer callback query")
+		return err
+	}
+
+	// Edit original message if accessible
+	if msg, ok := query.Message.(*gotgbot.Message); ok {
+		editedMsg, _, err := msg.EditText(b,
+			fmt.Sprintf("Nice to meet you %s! How can I help you today?", user.FirstName),
+			&gotgbot.EditMessageTextOpts{
+				ParseMode: helpers.HTML,
+			},
+		)
+		if err != nil {
+			logger.WithError(err).Error("Failed to edit message")
+			return err
+		}
+
+		logger.WithFields(log.Fields{
+			"edited_message_id": editedMsg.MessageId,
+		}).Debug("Successfully processed callback")
+	} else {
+		logger.Debug("Message is not accessible, skipping edit")
 	}
 
 	return ext.EndGroups
 }
 
 func LoadHello(dispatcher *ext.Dispatcher) {
+	log.WithFields(log.Fields{
+		"module": "Hello",
+	}).Info("Loading hello module")
+
 	// Register the module
 	HelpModule.AbleMap.Store("Hello", true)
 
 	// Add command handler
 	dispatcher.AddHandler(handlers.NewCommand("hello", helloModule.hello))
-	log.Info("Hello module loaded successfully")
+
+	// Add callback handler
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("hello_hi_back"), helloModule.helloCallback))
+
+	log.WithFields(log.Fields{
+		"module":   "Hello",
+		"handlers": []string{"hello", "hello_hi_back"},
+	}).Info("Hello module loaded successfully")
 }

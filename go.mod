@@ -8,12 +8,12 @@ toolchain go1.22.5
 require (
 	github.com/PaulSonOfLars/gotg_md2html v0.0.0-20240605215313-a6fdd2445f54
 	github.com/PaulSonOfLars/gotgbot/v2 v2.0.0-rc.28
-	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/dgraph-io/ristretto v0.1.1
 	github.com/dustin/go-humanize v1.0.1
 	github.com/eko/gocache/lib/v4 v4.1.6
 	github.com/eko/gocache/store/redis/v4 v4.2.2
 	github.com/eko/gocache/store/ristretto/v4 v4.2.2
+	github.com/fatih/color v1.14.1
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/redis/go-redis/v9 v9.6.1
@@ -34,6 +34,8 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect

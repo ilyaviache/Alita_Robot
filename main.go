@@ -9,6 +9,7 @@ import (
 	"github.com/divideprojects/Alita_Robot/alita/config"
 	"github.com/divideprojects/Alita_Robot/alita/i18n"
 	"github.com/divideprojects/Alita_Robot/alita/utils/helpers"
+	"github.com/divideprojects/Alita_Robot/alita/utils/logger"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
@@ -20,6 +21,9 @@ import (
 var Locales embed.FS
 
 func main() {
+	// Initialize logger
+	logger.InitLogger(config.Debug)
+
 	// logs if bot is running in debug mode or not
 	if config.Debug {
 		log.Info("Running in DEBUG Mode...")
