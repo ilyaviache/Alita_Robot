@@ -6,15 +6,15 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/divideprojects/Alita_Robot/alita/config"
-	"github.com/divideprojects/Alita_Robot/alita/i18n"
-	"github.com/divideprojects/Alita_Robot/alita/utils/helpers"
-	"github.com/divideprojects/Alita_Robot/alita/utils/logger"
+	config "github.com/divideprojects/Alita_Robot/alita/config"
+	i18n "github.com/divideprojects/Alita_Robot/alita/i18n"
+	helpers "github.com/divideprojects/Alita_Robot/alita/utils/helpers"
+	logger "github.com/divideprojects/Alita_Robot/alita/utils/logger"
 
-	"github.com/PaulSonOfLars/gotgbot/v2"
-	"github.com/PaulSonOfLars/gotgbot/v2/ext"
+	gotgbot "github.com/PaulSonOfLars/gotgbot/v2"
+	ext "github.com/PaulSonOfLars/gotgbot/v2/ext"
 
-	"github.com/divideprojects/Alita_Robot/alita"
+	alita "github.com/divideprojects/Alita_Robot/alita"
 )
 
 //go:embed locales
